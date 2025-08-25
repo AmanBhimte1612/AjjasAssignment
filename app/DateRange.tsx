@@ -215,24 +215,22 @@ const DateRange = () => {
         </View>
     )
 }
-
-const Option = ({ activeOpt, range, title, setValue, setActiveOpt }: any) => {
+const Option = ({ activeOpt, label, title, value, setValue, setActiveOpt }: any) => {
     return (
-        <TouchableOpacity className=' flex-row justify-between items-center py-4 px-5 border-b border-gray-700'
-            onPress={() => { setActiveOpt(true), setValue(range) }}
+        <TouchableOpacity
+            className='flex-row justify-between items-center py-4 px-5 border-b border-gray-700'
+            onPress={() => { setActiveOpt(true); setValue(value) }}
         >
-            <View >
-                <Text className={`${activeOpt ? 'text-[#FFBE00]' : 'text-white'} text-xl font-semibold`}>{title}</Text>
-                <Text className='text-gray-400'>{range}</Text>
-            </View>
-
             <View>
-                {activeOpt && <Feather name='check' size={24} color={'#FFBE00'} />}
+                <Text className={`${activeOpt ? 'text-[#FFBE00]' : 'text-white'} text-xl font-semibold`}>
+                    {title}
+                </Text>
+                <Text className='text-gray-400'>{label}</Text>
             </View>
+            {activeOpt && <Feather name='check' size={24} color={'#FFBE00'} />}
         </TouchableOpacity>
     )
 }
-
 
 export default DateRange
 
