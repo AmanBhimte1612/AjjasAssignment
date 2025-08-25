@@ -1,40 +1,39 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
-import DistanceIcon from "../assets/icons/distance.svg";
-import DurationIcon from "../assets/icons/time.svg";
+import AvgSpeedIcon from "../assets/icons/avg_speed.svg";
+import TopSpeedIcon from "../assets/icons/top_speed.svg";
 import DownIcon from "../assets/icons/goingdownIcon.svg";
 import UpIcon from "../assets/icons/goingupIcon.svg";
 
-
-const Journey = ({dist_percent,dur_percent ,distance,duration ,disval,durval}) => {
-    const [disValue, setDistValue] = useState(disval)
-    const [durValue, setDurValue] = useState(durval)
+const Speed = ({ avgpercent,toppercent,avg_speed,top_speed,avgval,topval}) => {
+    const [avgValue, setAvgValue] = useState(avgval)
+    const [topValue, setTopValue] = useState(topval)
 
     return (
         <View className="bg-[#1A1A1A] border border-gray-700 rounded-xl  mx-4 p-5">
             <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-white text-lg font-semibold">Journey</Text>
+                <Text className="text-white text-lg font-semibold">Speed</Text>
                 <AntDesign name="arrowright" color="white" size={20} />
             </View>
 
             <View className="flex-row justify-between items-center">
                 <View className="flex-1 items-center">
                     <View className="flex-row items-center space-x-2 mb-2">
-                        <DistanceIcon width={24} height={24} />
-                        <Text className="text-gray-300 ml-2 text-sm">Distance Travelled</Text>
+                        <AvgSpeedIcon width={24} height={24} />
+                        <Text className="text-gray-300 ml-2 text-sm">Average Speed</Text>
                     </View>
                     <View className="flex-row items-end">
-                        <Text className="text-white text-4xl font-bold">{distance}</Text>
-                        <Text className="text-gray-400 ml-1 mb-1">km</Text>
+                        <Text className="text-white text-4xl font-bold">{avg_speed}</Text>
+                        <Text className="text-gray-400 ml-1 mb-1">km/hr</Text>
                     </View>
                     <View className="flex-row">
-                        {disValue  ?
+                        {avgValue  ?
                             <UpIcon height={14} width={14} />
                             :
                             <DownIcon height={14} width={14} />
                         }
-                        <Text className={disValue  ? 'text-xs text-green-500' : 'text-xs text-red-500'}> {dist_percent}% </Text>
+                        <Text className={avgValue ? 'text-xs text-green-500' : 'text-xs text-red-500'}> {avgpercent}% </Text>
 
                         <Text className="text-xs text-gray-400"> vs </Text>
 
@@ -43,22 +42,23 @@ const Journey = ({dist_percent,dur_percent ,distance,duration ,disval,durval}) =
                 </View>
 
                 <View className="w-px h-16 bg-gray-700 mx-4" />
+
                 <View className="flex-1 items-center">
                     <View className="flex-row items-center space-x-2 mb-2">
-                        <DurationIcon width={24} height={24} />
-                        <Text className="text-gray-300 ml-2 text-sm">Time Duration</Text>
+                        <TopSpeedIcon width={24} height={24} />
+                        <Text className="text-gray-300 ml-2 text-sm">Top Speed</Text>
                     </View>
                     <View className="flex-row items-end">
-                        <Text className="text-white text-4xl font-bold">{duration}</Text>
-                        <Text className="text-gray-400 ml-1 mb-1">min</Text>
+                        <Text className="text-white text-4xl font-bold">{top_speed}</Text>
+                        <Text className="text-gray-400 ml-1 mb-1">km/hr</Text>
                     </View>
                     <View className="flex-row">
-                        {durValue  ?
+                        {topValue === 'down' ?
                             <UpIcon height={14} width={14} />
                             :
                             <DownIcon height={14} width={14} />
                         }
-                        <Text className={durValue  ? 'text-xs text-green-500' : 'text-xs text-red-500'}> {dur_percent}% </Text>
+                        <Text className={topValue ? 'text-xs text-green-500' : 'text-xs text-red-500'}> {toppercent}% </Text>
 
                         <Text className="text-xs text-gray-400"> vs </Text>
 
@@ -70,4 +70,4 @@ const Journey = ({dist_percent,dur_percent ,distance,duration ,disval,durval}) =
     );
 };
 
-export default Journey;
+export default Speed;
