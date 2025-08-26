@@ -1,21 +1,25 @@
-import { View, Text, Pressable, TouchableOpacity } from 'react-native'
+import { View, Text, Pressable, TouchableOpacity, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons'
-import { useNavigation } from 'expo-router'
+import { router, useNavigation } from 'expo-router'
+import { useDateRange } from '@/hooks/useDateRange'
+import DateTimePicker from "@react-native-community/datetimepicker";
+
 
 const DateRange = () => {
     const navigation = useNavigation()
     const [activeTab, setActiveTab] = useState('day')
     const [activeOpt, setActiveOpt] = useState('present')
 
-    // each option will have { label, value: {start, end} }
     const [present, setPresent] = useState<any>({})
     const [past, setPast] = useState<any>({})
     const [before, setBefore] = useState<any>({})
+    const [custom, setCustom] = useState<any>({})
     const [selectedVal, setSelectedVal] = useState<any>(null)
 
 
     useEffect(() => {
+
         if (activeTab === 'day') {
             const today = new Date();
             const startToday = new Date(today.setHours(0, 0, 0, 0)).getTime();
@@ -65,10 +69,38 @@ const DateRange = () => {
             setPast({ title: "Last month", label: formatDateRange(lastmonth.start, lastmonth.end), value: lastmonth })
             setBefore({ title: "Last 30 days", label: formatDateRange(last30.start, last30.end), value: last30 })
         }
-    }, [activeTab])
+        else if (activeTab === 'other') {
+            const thisyear = getDateRange('thisYear')
+            const lastyear = getDateRange('lastYear')
+            const lifetime = getDateRange('lifetime')
+            
 
+            setPresent({ title: "This year", label: formatDateRange(thisyear.start, thisyear.end), value: thisyear })
+            setPast({ title: "Last year", label: formatDateRange(lastyear.start, lastyear.end), value: lastyear })
+            setBefore({ title: "LifeTime", label: formatDateRange(lifetime.start, lifetime.end), value: lifetime })
+        }
+    }, [activeTab])
+    const { setRange } = useDateRange();
+
+    const handleSave = () => {
+        if (selectedVal) {
+            setRange(selectedVal.start, selectedVal.end, selectedVal.title);
+            router.back();
+        } else {
+            router.back();
+        }
+    };
     const getDateRange = (
-        type: "thisWeek" | "lastWeek" | "last7" | "last30" | "thisMonth" | "lastMonth" | "thisYear" | "lastYear"
+        type:
+            | "thisWeek"
+            | "lastWeek"
+            | "last7"
+            | "last30"
+            | "thisMonth"
+            | "lastMonth"
+            | "thisYear"
+            | "lastYear"
+            | "lifetime"
     ) => {
         const today = new Date();
         let start: Date, end: Date;
@@ -93,20 +125,16 @@ const DateRange = () => {
                 end = new Date(endOfThisWeek);
                 end.setDate(end.getDate() - 7);
             }
-        }
-
-        else if (type === "last7" || type === "last30") {
+        } else if (type === "last7" || type === "last30") {
             end = new Date(today);
             end.setHours(23, 59, 59, 999);
 
             start = new Date(today);
             start.setDate(today.getDate() - (type === "last7" ? 6 : 29));
             start.setHours(0, 0, 0, 0);
-        }
-
-        else if (type === "thisMonth" || type === "lastMonth") {
+        } else if (type === "thisMonth" || type === "lastMonth") {
             const year = today.getFullYear();
-            const month = today.getMonth(); // 0 = Jan
+            const month = today.getMonth();
 
             if (type === "thisMonth") {
                 start = new Date(year, month, 1, 0, 0, 0, 0);
@@ -115,9 +143,7 @@ const DateRange = () => {
                 start = new Date(year, month - 1, 1, 0, 0, 0, 0);
                 end = new Date(year, month, 0, 23, 59, 59, 999);
             }
-        }
-
-        else if (type === "thisYear" || type === "lastYear") {
+        } else if (type === "thisYear" || type === "lastYear") {
             const year = today.getFullYear();
 
             if (type === "thisYear") {
@@ -127,9 +153,10 @@ const DateRange = () => {
                 start = new Date(year - 1, 0, 1, 0, 0, 0, 0);
                 end = new Date(year - 1, 11, 31, 23, 59, 59, 999);
             }
-        }
-
-        else {
+        } else if (type === "lifetime") {
+            start = new Date(2022, 3, 5, 0, 0, 0, 0);
+            end = today;
+        } else {
             throw new Error("Invalid type");
         }
 
@@ -140,13 +167,15 @@ const DateRange = () => {
     };
 
 
+
     const formatDateRange = (startMillis: number, endMillis: number) => {
         const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
         const startStr = new Date(startMillis).toLocaleDateString("en-US", options);
         const endStr = new Date(endMillis).toLocaleDateString("en-US", options);
         return `${startStr} - ${endStr}`;
     };
-
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(new Date());
 
 
     return (
@@ -162,7 +191,8 @@ const DateRange = () => {
                         <Text className='text-white text-[20px]  font-semibold '>Date range</Text>
                     </View>
 
-                    <Pressable className='mx-5'>
+                    <Pressable className='mx-5'
+                        onPress={handleSave}>
                         <Text className='text-[#FFBE00] text-lg'>Save</Text>
                     </Pressable>
                 </View>
@@ -192,7 +222,7 @@ const DateRange = () => {
                     value={present.value}
                     activeOpt={activeOpt === 'present'}
                     setActiveOpt={() => setActiveOpt('present')}
-                    setValue={(val) => setSelectedVal(val)}
+                    setValue={(val) => {setSelectedVal(val),setCustom({ title: "Custom", label: formatDateRange(val.start, Custom.end) })}}
                 />
                 <Option
                     title={past.title}
@@ -210,6 +240,20 @@ const DateRange = () => {
                     setActiveOpt={() => setActiveOpt('before')}
                     setValue={(val) => setSelectedVal(val)}
                 />
+                {activeTab === 'other'&&
+                <CustomOption
+                    activeOpt={activeOpt === "custom"}
+                    title="Custom"
+                    label="Pick your own range"
+                    setValue={(val)=>{setSelectedVal(val),setCustom({ title: "Custom", label: formatDateRange(val.start, val.end)})}}
+                    setActiveOpt={() => {setActiveOpt('custom') }}
+                    start={startDate}
+                    end={endDate}
+                    setStart={setStartDate}
+                    setEnd={setEndDate}
+                />}
+
+
             </View>
 
         </View>
@@ -231,6 +275,108 @@ const Option = ({ activeOpt, label, title, value, setValue, setActiveOpt }: any)
         </TouchableOpacity>
     )
 }
+
+
+const CustomOption = ({
+    activeOpt,
+    label,
+    title,
+    value,
+    setValue,
+    setActiveOpt,
+    start,
+    end,
+    setStart,
+    setEnd,
+}: any) => {
+    const [showStartPicker, setShowStartPicker] = useState(false);
+    const [showEndPicker, setShowEndPicker] = useState(false);
+
+
+
+    return (
+        <View>
+            {/* Header row */}
+            <TouchableOpacity
+                className="flex-row justify-between items-center py-4 px-5"
+                onPress={() => {
+                    setActiveOpt(true);
+                    setValue({start,end});
+                }}
+            >
+                <View>
+                    <Text
+                        className={`${activeOpt ? "text-[#FFBE00]" : "text-white"
+                            } text-xl font-semibold`}
+                    >
+                        {title}
+                    </Text>
+                    <Text className="text-gray-400">{label}</Text>
+                </View>
+                {activeOpt && <Feather name="check" size={24} color={"#FFBE00"} />}
+            </TouchableOpacity>
+
+            <View className="flex-row justify-between">
+                {/* Start Date Button */}
+                <TouchableOpacity
+                    className="w-[45%] border flex-row py-3 gap-x-4 px-3 justify-start items-center border-gray-700 rounded-lg mx-3"
+                    onPress={() => setShowStartPicker(true)}
+                >
+                    <AntDesign name="calendar" size={24} color="white" />
+                    <View>
+                        <Text className="text-white text-xl">Start date</Text>
+                        <Text className=" text-xs text-gray-400">{start.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</Text>
+                    </View>
+                </TouchableOpacity>
+
+                {/* End Date Button */}
+                <TouchableOpacity
+                    className="w-[45%] border flex-row py-3 gap-x-4 px-3 justify-start items-center border-gray-700 rounded-lg mx-3"
+                    onPress={() => setShowEndPicker(true)}
+                >
+                    <AntDesign name="calendar" size={24} color="white" />
+                    <View>
+                        <Text className="text-white text-xl">End date</Text>
+                        <Text className=" text-xs text-gray-400">{end.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
+
+
+            {/* Start Date Picker */}
+            {showStartPicker && (
+                <DateTimePicker
+                    value={start}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "inline" : "default"}
+                    onChange={(e, date) => {
+                        setShowStartPicker(false);
+                        if (date) setStart(date);
+                    }}
+                />
+            )}
+
+            {/* End Date Picker */}
+            {showEndPicker && (
+                <DateTimePicker
+                    value={end}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "inline" : "default"}
+                    onChange={(e, date) => {
+                        setShowEndPicker(false);
+                        if (date) setEnd(date);
+                    }}
+                />
+            )}
+        </View>
+    );
+};
+
+
+
+
+
+
 
 export default DateRange
 
